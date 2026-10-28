@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Trị Thiệp Cưới | Văn Hiền &amp; Thu Hà</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="alert" aria-live="polite" hidden></div>
+
+  <!-- AUTH VIEW -->
+  <main id="auth-view" class="auth-wrapper" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-badge">Hệ Thống Quản Trị</span>
+        <h1 id="auth-title" class="auth-title">Văn Hiền &amp; Thu Hà</h1>
+        <p class="auth-subtitle">Đăng nhập để xem phản hồi RSVP và duyệt lời chúc từ khách mời.</p>
+      </div>
+
+      <div id="login-alert" class="alert alert-error" role="alert" hidden></div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="username">Tên đăng nhập</label>
+          <input type="text" id="username" name="username" class="form-input" autocomplete="username" required autofocus placeholder="Nhập tên tài khoản">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input type="password" id="password" name="password" class="form-input" autocomplete="current-password" required placeholder="Nhập mật khẩu">
+        </div>
+
+        <button type="submit" id="login-btn" class="btn btn-primary btn-block">
+          <span class="btn-text">Đăng nhập</span>
+          <span class="btn-spinner" hidden aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="/" class="auth-link">&larr; Quay lại trang thiệp cưới</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard-view" class="dashboard-wrapper" hidden>
+    <header class="admin-header">
+      <div class="header-inner container">
+        <div class="brand-area">
+          <span class="brand-title">Văn Hiền &amp; Thu Hà</span>
+          <span class="brand-tag">Quản Trị</span>
+        </div>
+        <div class="user-area">
+          <span class="user-greeting">Xin chào, <strong id="admin-username-display">Admin</strong></span>
+          <a href="/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">Xem thiệp</a>
+          <button type="button" id="logout-btn" class="btn btn-outline btn-sm">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-main container">
+      <!-- STATS SECTION -->
+      <section class="stats-section" aria-label="Thống kê tổng quan">
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-label">Tổng phản hồi RSVP</span>
+            <span id="stat-rsvp-total" class="stat-value">0</span>
+            <span class="stat-desc">Lượt khách gửi phản hồi</span>
+          </article>
+
+          <article class="stat-card stat-success">
+            <span class="stat-label">Xác nhận tham dự</span>
+            <span id="stat-rsvp-attending" class="stat-value">0</span>
+            <span class="stat-desc">Khách chắc chắn đến chung vui</span>
+          </article>
+
+          <article class="stat-card stat-muted">
+            <span class="stat-label">Không tham dự</span>
+            <span id="stat-rsvp-declined" class="stat-value">0</span>
+            <span class="stat-desc">Khách đã gửi lời cáo lỗi</span>
+          </article>
+
+          <article class="stat-card stat-highlight">
+            <span class="stat-label">Tổng số khách dự kiến</span>
+            <span id="stat-guest-count" class="stat-value">0</span>
+            <span class="stat-desc">Chỉ tính theo số người tham dự</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">Lời chúc khách mời</span>
+            <span id="stat-wishes-total" class="stat-value">0</span>
+            <span class="stat-desc"><span id="stat-wishes-pending">0</span> lời chúc đang chờ duyệt</span>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-label">Hình ảnh &amp; Album</span>
+            <span id="stat-media-total" class="stat-value">0</span>
+            <span class="stat-desc"><span id="stat-album-count">0</span> ảnh hiển thị trong album</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- NAVIGATION TABS -->
+      <section class="management-section">
+        <div class="tabs-bar" role="tablist" aria-label="Khu vực quản lý">
+          <button type="button" role="tab" id="tab-rsvps" aria-selected="true" aria-controls="panel-rsvps" class="tab-btn active">
+            Quản lý RSVP (<span id="tab-rsvp-count">0</span>)
+          </button>
+          <button type="button" role="tab" id="tab-wishes" aria-selected="false" aria-controls="panel-wishes" class="tab-btn">
+            Duyệt Lời Chúc (<span id="tab-wishes-pending-count">0</span>)
+          </button>
+          <button type="button" role="tab" id="tab-media" aria-selected="false" aria-controls="panel-media" class="tab-btn">
+            Quản Lý Hình Ảnh (<span id="tab-media-count">0</span>)
+          </button>
+          <button type="button" role="tab" id="tab-content" aria-selected="false" aria-controls="panel-content" class="tab-btn">
+            Nội Dung Thiệp
+          </button>
+          <button type="button" role="tab" id="tab-banking" aria-selected="false" aria-controls="panel-banking" class="tab-btn">
+            Mừng Cưới &amp; QR
+          </button>
+        </div>
+
+        <!-- PANEL 1: RSVPS -->
+        <div id="panel-rsvps" class="tab-panel active" role="tabpanel" aria-labelledby="tab-rsvps">
+          <div class="panel-toolbar">
+            <div class="filter-group" role="group" aria-label="Lọc trạng thái RSVP">
+              <button type="button" class="filter-pill active" data-rsvp-filter="all">Tất cả</button>
+              <button type="button" class="filter-pill" data-rsvp-filter="attending">Tham dự</button>
+              <button type="button" class="filter-pill" data-rsvp-filter="declined">Không tham dự</button>
+            </div>
+            <div class="search-group">
+              <input type="search" id="rsvp-search-input" class="search-input" placeholder="Tìm tên khách mời...">
+              <button type="button" id="rsvp-refresh-btn" class="btn btn-secondary btn-sm">Làm mới</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 80px;">STT</th>
+                  <th scope="col">Tên khách mời</th>
+                  <th scope="col" style="width: 160px;">Trạng thái</th>
+                  <th scope="col" style="width: 140px;">Số người đi</th>
+                  <th scope="col" style="width: 200px;">Thời gian gửi</th>
+                </tr>
+              </thead>
+              <tbody id="rsvp-table-body">
+                <tr><td colspan="5" class="empty-state">Đang tải dữ liệu...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <nav class="pagination-bar" aria-label="Phân trang RSVP">
+            <button type="button" id="rsvp-prev-btn" class="btn btn-outline btn-sm" disabled>&larr; Trang trước</button>
+            <span id="rsvp-page-info" class="page-info">Trang 1 / 1</span>
+            <button type="button" id="rsvp-next-btn" class="btn btn-outline btn-sm" disabled>Trang sau &rarr;</button>
+          </nav>
+        </div>
+
+        <!-- PANEL 2: WISHES -->
+        <div id="panel-wishes" class="tab-panel" role="tabpanel" aria-labelledby="tab-wishes" hidden>
+          <div class="panel-toolbar">
+            <div class="filter-group" role="group" aria-label="Lọc trạng thái lời chúc">
+              <button type="button" class="filter-pill active" data-wish-filter="all">Tất cả</button>
+              <button type="button" class="filter-pill" data-wish-filter="pending">Chờ duyệt</button>
+              <button type="button" class="filter-pill" data-wish-filter="approved">Đã duyệt</button>
+              <button type="button" class="filter-pill" data-wish-filter="hidden">Đã ẩn</button>
+            </div>
+            <div class="search-group">
+              <input type="search" id="wish-search-input" class="search-input" placeholder="Tìm theo tên hoặc nội dung...">
+              <button type="button" id="wish-refresh-btn" class="btn btn-secondary btn-sm">Làm mới</button>
+            </div>
+          </div>
+
+          <div id="wishes-list" class="wishes-grid">
+            <div class="empty-state">Đang tải danh sách lời chúc...</div>
+          </div>
+
+          <nav class="pagination-bar" aria-label="Phân trang Lời chúc">
+            <button type="button" id="wish-prev-btn" class="btn btn-outline btn-sm" disabled>&larr; Trang trước</button>
+            <span id="wish-page-info" class="page-info">Trang 1 / 1</span>
+            <button type="button" id="wish-next-btn" class="btn btn-outline btn-sm" disabled>Trang sau &rarr;</button>
+          </nav>
+        </div>
+
+        <!-- PANEL 3: MEDIA MANAGEMENT -->
+        <div id="panel-media" class="tab-panel" role="tabpanel" aria-labelledby="tab-media" hidden>
+          <!-- Upload Box -->
+          <div class="upload-section">
+            <div class="upload-dropzone" id="upload-dropzone">
+              <input type="file" id="media-file-input" multiple accept="image/jpeg,image/png,image/webp" hidden>
+              <div class="dropzone-content">
+                <span class="dropzone-icon" aria-hidden="true">📷</span>
+                <p class="dropzone-title">Kéo thả ảnh vào đây hoặc nhấn để chọn ảnh</p>
+                <p class="dropzone-subtitle">Chấp nhận định dạng <strong>JPEG, PNG, WebP</strong>. Tối đa 5MB / file, tối đa 10 ảnh / lần tải.</p>
+                <button type="button" id="media-browse-btn" class="btn btn-primary btn-sm">Chọn ảnh từ thiết bị</button>
+              </div>
+            </div>
+
+            <!-- Upload Previews -->
+            <div id="upload-preview-area" class="upload-preview-area" hidden>
+              <div class="preview-header">
+                <span class="preview-title">Ảnh chuẩn bị tải lên (<span id="preview-count">0</span>):</span>
+                <div class="preview-actions">
+                  <button type="button" id="upload-confirm-btn" class="btn btn-primary btn-sm">
+                    <span class="btn-text">Bắt đầu tải lên</span>
+                    <span class="btn-spinner" hidden aria-hidden="true"></span>
+                  </button>
+                  <button type="button" id="upload-cancel-btn" class="btn btn-outline btn-sm">Hủy bỏ</button>
+                </div>
+              </div>
+              <div id="upload-preview-grid" class="upload-preview-grid"></div>
+            </div>
+          </div>
+
+          <!-- Subtabs: Library vs Album -->
+          <div class="subtabs-bar">
+            <button type="button" id="subtab-lib-btn" class="subtab-btn active">Thư viện ảnh (<span id="lib-count-badge">0</span>)</button>
+            <button type="button" id="subtab-album-btn" class="subtab-btn">Album cưới (<span id="album-count-badge">0</span>)</button>
+          </div>
+
+          <!-- SUBTAB 1: LIBRARY -->
+          <div id="subtab-lib-view" class="subtab-view active">
+            <div class="panel-toolbar">
+              <div class="filter-group" role="group" aria-label="Lọc ảnh thư viện">
+                <button type="button" class="filter-pill active" data-media-filter="all">Tất cả</button>
+                <button type="button" class="filter-pill" data-media-filter="cover">Ảnh bìa</button>
+                <button type="button" class="filter-pill" data-media-filter="album">Trong album</button>
+                <button type="button" class="filter-pill" data-media-filter="unused">Chưa sử dụng</button>
+              </div>
+              <button type="button" id="media-refresh-btn" class="btn btn-secondary btn-sm">Làm mới</button>
+            </div>
+
+            <div id="media-library-grid" class="media-grid">
+              <div class="empty-state">Đang tải thư viện ảnh...</div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 2: ALBUM -->
+          <div id="subtab-album-view" class="subtab-view" hidden>
+            <div class="album-info-bar">
+              <p class="album-info-desc">Các ảnh trong album sẽ hiển thị tại mục <em>"Chuyện của chúng mình"</em> trên thiệp cưới. Bạn có thể thay đổi thứ tự và bật/tắt hiển thị từng ảnh.</p>
+              <button type="button" id="album-refresh-btn" class="btn btn-secondary btn-sm">Làm mới</button>
+            </div>
+
+            <div id="media-album-grid" class="album-manage-grid">
+              <div class="empty-state">Chưa có ảnh nào trong album cưới. Hãy thêm ảnh từ Thư viện!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 4: WEDDING CONTENT MANAGEMENT -->
+        <div id="panel-content" class="tab-panel" role="tabpanel" aria-labelledby="tab-content" hidden>
+          <div class="panel-header-bar">
+            <div>
+              <h2 class="panel-title">Quản Lý Nội Dung Thiệp Cưới</h2>
+              <p class="panel-desc">Chỉnh sửa thông tin xuất hiện trên thiệp cưới công khai. Mọi thay đổi được lưu tức thì vào cơ sở dữ liệu và bảo toàn an toàn khi trang công khai hiển thị.</p>
+            </div>
+            <div class="panel-header-actions">
+              <button type="button" id="content-refresh-btn" class="btn btn-secondary btn-sm">Tải lại</button>
+              <button type="button" id="content-save-btn" class="btn btn-primary btn-sm">
+                <span class="btn-text">Lưu nội dung thiệp</span>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <form id="content-form" class="admin-form-container" novalidate>
+            <!-- SECTION 1: CÔ DÂU & CHÚ RỂ -->
+            <fieldset class="admin-fieldset">
+              <legend class="admin-legend">1. Tên Cô Dâu &amp; Chú Rể</legend>
+              <div class="form-row form-row--2cols">
+                <div class="form-group">
+                  <label for="content-groom-name" class="form-label">Tên Chú Rể <span class="required">*</span></label>
+                  <input type="text" id="content-groom-name" name="groom_name" class="form-input" maxlength="50" required placeholder="Ví dụ: Văn Hiền">
+                </div>
+                <div class="form-group">
+                  <label for="content-bride-name" class="form-label">Tên Cô Dâu <span class="required">*</span></label>
+                  <input type="text" id="content-bride-name" name="bride_name" class="form-input" maxlength="50" required placeholder="Ví dụ: Thu Hà">
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- SECTION 2: NGÀY GIỜ & ĐẾM NGƯỢC -->
+            <fieldset class="admin-fieldset">
+              <legend class="admin-legend">2. Thời Gian Tổ Chức &amp; Đồng Hồ Đếm Ngược</legend>
+              <div class="form-row form-row--3cols">
+                <div class="form-group">
+                  <label for="content-event-date-text" class="form-label">Ngày hiển thị trên thiệp</label>
+                  <input type="text" id="content-event-date-text" name="event_date_text" class="form-input" maxlength="100" placeholder="Ví dụ: 28–29.11.2026">
+                </div>
+                <div class="form-group">
+                  <label for="content-lunar-date-text" class="form-label">Ngày âm lịch</label>
+                  <input type="text" id="content-lunar-date-text" name="lunar_date_text" class="form-input" maxlength="100" placeholder="Ví dụ: 20–21 tháng 10 âm lịch">
+                </div>
+                <div class="form-group">
+                  <label for="content-event-date-iso" class="form-label">Mốc đếm ngược (ISO YYYY-MM-DDTHH:mm)</label>
+                  <input type="datetime-local" id="content-event-date-iso" name="event_date_iso" class="form-input">
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- SECTION 3: LỜI MỜI -->
+            <fieldset class="admin-fieldset">
+              <legend class="admin-legend">3. Lời Mời &amp; Thông Điệp</legend>
+              <div class="form-group">
+                <label for="content-invitation-title" class="form-label">Tiêu đề phần lời mời</label>
+                <input type="text" id="content-invitation-title" name="invitation_title" class="form-input" maxlength="150" placeholder="Ví dụ: Cùng chúng mình viết nên ngày vui.">
+              </div>
+              <div class="form-group">
+                <label for="content-invitation-copy" class="form-label">Nội dung thư mời</label>
+                <textarea id="content-invitation-copy" name="invitation_copy" class="form-textarea" rows="4" maxlength="1000" placeholder="Nhập tâm tư, lời ngỏ gửi tới khách mời..."></textarea>
+              </div>
+            </fieldset>
+
+            <!-- SECTION 4: ĐỊA ĐIỂM TỔ CHỨC & BẢN ĐỒ -->
+            <fieldset class="admin-fieldset">
+              <legend class="admin-legend">4. Địa Điểm Tổ Chức &amp; Bản Đồ</legend>
+              <div class="form-row form-row--2cols">
+                <div class="form-group">
+                  <label for="content-venue-name" class="form-label">Tên địa điểm / Tên trung tâm tiệc cưới</label>
+                  <input type="text" id="content-venue-name" name="venue_name" class="form-input" maxlength="100" placeholder="Ví dụ: Tư gia nhà trai">
+                </div>
+                <div class="form-group">
+                  <label for="content-venue-note" class="form-label">Ghi chú sảnh / Mô tả ngắn</label>
+                  <input type="text" id="content-venue-note" name="venue_note" class="form-input" maxlength="100" placeholder="Ví dụ: Lễ thành hôn được tổ chức ấm cúng...">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="content-venue-address" class="form-label">Địa chỉ chi tiết</label>
+                <input type="text" id="content-venue-address" name="venue_address" class="form-input" maxlength="255" placeholder="Ví dụ: TDP Ninh Sơn, Phường Vạn Hà, TP Bắc Ninh">
+              </div>
+              <div class="form-group">
+                <label for="content-map-url" class="form-label">Liên kết bản đồ Google Maps</label>
+                <input type="url" id="content-map-url" name="map_url" class="form-input" maxlength="500" placeholder="https://maps.app.goo.gl/... hoặc https://google.com/maps/...">
+              </div>
+            </fieldset>
+
+            <!-- SECTION 5: LỊCH TRÌNH SỰ KIỆN -->
+            <fieldset class="admin-fieldset">
+              <div class="fieldset-header">
+                <legend class="admin-legend">5. Lịch Trình Sự Kiện</legend>
+                <button type="button" id="schedule-add-btn" class="btn btn-secondary btn-sm">+ Thêm mốc sự kiện</button>
+              </div>
+              <div id="schedule-items-list" class="schedule-items-container">
+                <!-- Dynamically populated timeline items -->
+              </div>
+            </fieldset>
+
+            <!-- SECTION 6: NỘI DUNG CUỐI THIỆP -->
+            <fieldset class="admin-fieldset">
+              <legend class="admin-legend">6. Nội Dung Cuối Thiệp (Chân Trang)</legend>
+              <div class="form-row form-row--3cols">
+                <div class="form-group">
+                  <label for="content-closing-heading" class="form-label">Tiêu đề chân trang</label>
+                  <input type="text" id="content-closing-heading" name="closing_heading" class="form-input" maxlength="100" placeholder="Ví dụ: Khi có bạn bên cạnh.">
+                </div>
+                <div class="form-group">
+                  <label for="content-closing-names" class="form-label">Chữ ký tên cặp đôi</label>
+                  <input type="text" id="content-closing-names" name="closing_names" class="form-input" maxlength="100" placeholder="Ví dụ: Văn Hiền & Thu Hà">
+                </div>
+                <div class="form-group">
+                  <label for="content-closing-date" class="form-label">Dòng thời gian / Địa danh cuối</label>
+                  <input type="text" id="content-closing-date" name="closing_date" class="form-input" maxlength="100" placeholder="Ví dụ: 28–29 · 11 · 2026 — Bắc Ninh">
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="form-bottom-actions">
+              <button type="button" id="content-save-btn-bottom" class="btn btn-primary">
+                <span class="btn-text">Lưu thay đổi nội dung</span>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANEL 5: BANKING & VIETQR CONFIGURATION -->
+        <div id="panel-banking" class="tab-panel" role="tabpanel" aria-labelledby="tab-banking" hidden>
+          <div class="panel-header-bar">
+            <div>
+              <h2 class="panel-title">Quản Lý Nhận Mừng Cưới &amp; Mã VietQR</h2>
+              <p class="panel-desc">Cấu hình số tài khoản ngân hàng của Chú Rể và Cô Dâu để tự động sinh mã VietQR theo chuẩn Napas. Khách mời có thể quét mã trực tiếp trên thiệp.</p>
+            </div>
+            <div class="panel-header-actions">
+              <button type="button" id="banking-refresh-btn" class="btn btn-secondary btn-sm">Tải lại</button>
+              <button type="button" id="banking-save-btn" class="btn btn-primary btn-sm">
+                <span class="btn-text">Lưu thông tin mừng cưới</span>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Security notice banner -->
+          <div class="security-notice-banner">
+            <span class="security-icon" aria-hidden="true">🛡️</span>
+            <div class="security-text">
+              <strong>An Toàn &amp; Bảo Mật Tuyệt Đối:</strong> Hệ thống chỉ lưu thông tin số tài khoản công khai để tạo mã VietQR QuickLink (theo chuẩn Napas). Tuyệt đối không yêu cầu hay lưu trữ mật khẩu, mã PIN, CVV, OTP hoặc can thiệp vào tài khoản ngân hàng của bạn.
+            </div>
+          </div>
+
+          <form id="banking-form" class="banking-cards-grid" novalidate>
+            <!-- GROOM ACCOUNT CARD -->
+            <article class="banking-admin-card" data-bank-card="groom">
+              <header class="banking-card-header">
+                <div class="banking-card-title-group">
+                  <span class="role-pill">Chú Rể</span>
+                  <h3 class="banking-card-title">Tài Khoản Mừng Cưới Chú Rể</h3>
+                </div>
+                <label class="toggle-switch" title="Bật/Tắt hiển thị mừng cưới cho Chú Rể">
+                  <input type="checkbox" id="bank-groom-enabled" name="groom_enabled">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">Bật nhận mừng</span>
+                </label>
+              </header>
+
+              <div class="banking-card-body">
+                <div class="form-group">
+                  <label for="bank-groom-bin" class="form-label">Ngân hàng thụ hưởng <span class="required">*</span></label>
+                  <select id="bank-groom-bin" name="groom_bank_bin" class="form-select">
+                    <option value="">-- Chọn ngân hàng --</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-groom-account-number" class="form-label">Số tài khoản ngân hàng <span class="required">*</span></label>
+                  <input type="text" id="bank-groom-account-number" name="groom_account_number" class="form-input" maxlength="25" placeholder="Nhập số tài khoản chính xác">
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-groom-account-holder" class="form-label">Tên chủ tài khoản (in hoa không dấu) <span class="required">*</span></label>
+                  <input type="text" id="bank-groom-account-holder" name="groom_account_holder" class="form-input" maxlength="60" placeholder="Ví dụ: NGUYEN VAN TRONG">
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-groom-transfer-note" class="form-label">Nội dung chuyển khoản gợi ý</label>
+                  <input type="text" id="bank-groom-transfer-note" name="groom_transfer_note" class="form-input" maxlength="50" placeholder="Ví dụ: Mung cuoi Trong">
+                </div>
+
+                <!-- VietQR Live Preview -->
+                <div class="vietqr-live-preview">
+                  <p class="preview-label">Xem trước mã VietQR tự động:</p>
+                  <div class="preview-qr-box" id="bank-groom-qr-box">
+                    <span class="qr-placeholder-text">Điền đủ thông tin để tạo mã QR</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <!-- BRIDE ACCOUNT CARD -->
+            <article class="banking-admin-card" data-bank-card="bride">
+              <header class="banking-card-header">
+                <div class="banking-card-title-group">
+                  <span class="role-pill role-pill--bride">Cô Dâu</span>
+                  <h3 class="banking-card-title">Tài Khoản Mừng Cưới Cô Dâu</h3>
+                </div>
+                <label class="toggle-switch" title="Bật/Tắt hiển thị mừng cưới cho Cô Dâu">
+                  <input type="checkbox" id="bank-bride-enabled" name="bride_enabled">
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">Bật nhận mừng</span>
+                </label>
+              </header>
+
+              <div class="banking-card-body">
+                <div class="form-group">
+                  <label for="bank-bride-bin" class="form-label">Ngân hàng thụ hưởng <span class="required">*</span></label>
+                  <select id="bank-bride-bin" name="bride_bank_bin" class="form-select">
+                    <option value="">-- Chọn ngân hàng --</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-bride-account-number" class="form-label">Số tài khoản ngân hàng <span class="required">*</span></label>
+                  <input type="text" id="bank-bride-account-number" name="bride_account_number" class="form-input" maxlength="25" placeholder="Nhập số tài khoản chính xác">
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-bride-account-holder" class="form-label">Tên chủ tài khoản (in hoa không dấu) <span class="required">*</span></label>
+                  <input type="text" id="bank-bride-account-holder" name="bride_account_holder" class="form-input" maxlength="60" placeholder="Ví dụ: TRAN THI LINH">
+                </div>
+
+                <div class="form-group">
+                  <label for="bank-bride-transfer-note" class="form-label">Nội dung chuyển khoản gợi ý</label>
+                  <input type="text" id="bank-bride-transfer-note" name="bride_transfer_note" class="form-input" maxlength="50" placeholder="Ví dụ: Mung cuoi Linh">
+                </div>
+
+                <!-- VietQR Live Preview -->
+                <div class="vietqr-live-preview">
+                  <p class="preview-label">Xem trước mã VietQR tự động:</p>
+                  <div class="preview-qr-box" id="bank-bride-qr-box">
+                    <span class="qr-placeholder-text">Điền đủ thông tin để tạo mã QR</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </form>
+
+          <div class="form-bottom-actions">
+            <button type="button" id="banking-save-btn-bottom" class="btn btn-primary">
+              <span class="btn-text">Lưu thông tin mừng cưới</span>
+              <span class="btn-spinner" hidden aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
